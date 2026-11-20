@@ -42,6 +42,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Restrict bar creation
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, only users who are an admin of an existing bar can create
+    | new bars. Everyone else stays limited to the bars they were added to.
+    | The very first bar on a fresh install can still be created by anyone.
+    |
+    */
+
+    'restrict_bar_creation' => env(
+        'RESTRICT_BAR_CREATION',
+        false
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mail confirmation
     |--------------------------------------------------------------------------
     |

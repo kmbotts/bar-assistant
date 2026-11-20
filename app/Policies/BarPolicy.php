@@ -6,6 +6,7 @@ namespace Kami\Cocktail\Policies;
 
 use Kami\Cocktail\Models\Bar;
 use Kami\Cocktail\Models\User;
+use Kami\Cocktail\Models\Enums\UserRoleEnum;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BarPolicy
@@ -14,6 +15,10 @@ class BarPolicy
 
     public function create(User $user): bool
     {
+        if (config('bar-assistant.restrict_bar_creation') === true && !$this->canCreateWhenRestricted($user)) {
+            return false;
+        }
+
         if (!config('bar-assistant.enable_billing')) {
             return true;
         }
@@ -22,6 +27,13 @@ class BarPolicy
 
         return (!$user->hasActiveSubscription() && $barCount < (int) config('bar-assistant.max_default_bars'))
             || ($user->hasActiveSubscription() && $barCount < (int) config('bar-assistant.max_premium_bars'));
+    }
+
+    private function canCreateWhenRestricted(User $user): bool
+    {
+        $isFirstBar = !Bar::query()->exists();
+
+        return $isFirstBar || $user->memberships()->where('user_role_id', UserRoleEnum::Admin->value)->exists();
     }
 
     public function show(User $user, Bar $bar): bool
